@@ -4,6 +4,12 @@ from ollama import chat
 from datetime import datetime
 import os
 
+from database import (
+    init_db,
+    save_incident,
+    get_all_incidents
+)
+
 MEMORY_FILE = "memory/incidents.txt"
 
 
@@ -43,6 +49,8 @@ def load_memory():
     except FileNotFoundError:
 
         return "No previous incidents."
+
+init_db()
 
 st.title("Network AI Agent")
 
@@ -107,8 +115,36 @@ Provide:
             analysis
             )
 
+        save_incident(
+            str(datetime.now()),
+            network_data,
+            analysis
+        )
+        
         st.write(analysis)
 
 if st.button("View Memory"):
 
     st.text(load_memory())
+
+if st.button("View Database"):
+
+    incidents = get_all_incidents()
+
+    st.subheader("Incident Database")
+
+    for incident in incidents:
+
+        st.write(f"ID: {incident[0]}")
+
+        st.write(f"Date: {incident[1]}")
+
+        st.write("Network Input:")
+
+        st.write(incident[2])
+
+        st.write("Analysis:")
+
+        st.write(incident[3])
+
+        st.divider()
