@@ -1,0 +1,9 @@
+show ip route
+
+Gateway of last resort is not set
+
+C 192.168.2.0/24 is directly connected
+
+ping 192.168.1.1
+
+Request timed out

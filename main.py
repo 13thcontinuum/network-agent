@@ -1,16 +1,32 @@
+from ollama import chat
+
+# Read router output
 with open("router_output.txt", "r") as file:
     network_data = file.read()
 
-print("\n=== Network Troubleshooting Agent ===\n")
+response = chat(
+    model="llama3.2",
+    messages=[
+        {
+            "role": "system",
+            "content": """
+You are a senior Cisco network engineer.
 
-print("Data Loaded:\n")
-print(network_data)
+Analyse network troubleshooting output.
 
-print("\nAGENT ANALYSIS\n")
+Provide:
+1. Summary
+2. Issues Found
+3. Root Cause
+4. Recommended Fixes
+"""
+        },
+        {
+            "role": "user",
+            "content": network_data
+        }
+    ]
+)
 
-if "Gateway of last resort is not set" in network_data:
-    print("Issue Found:")
-    print("- Missing default route")
-
-else:
-    print("No obvious issue detected")
+print("\n=== AI NETWORK ANALYSIS ===\n")
+print(response["message"]["content"])
