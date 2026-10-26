@@ -67,3 +67,19 @@ def get_all_incidents():
     conn.close()
 
     return rows
+
+def count_incidents():
+
+    conn = sqlite3.connect(DB_NAME)
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT COUNT(*) FROM incidents"
+    )
+
+    total = cursor.fetchone()[0]
+
+    conn.close()
+
+    return total

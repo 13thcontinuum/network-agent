@@ -7,7 +7,8 @@ import os
 from database import (
     init_db,
     save_incident,
-    get_all_incidents
+    get_all_incidents,
+    count_incidents,
 )
 
 MEMORY_FILE = "memory/incidents.txt"
@@ -53,6 +54,15 @@ def load_memory():
 init_db()
 
 st.title("Network AI Agent")
+
+st.subheader("Incident Dashboard")
+
+total_incidents = count_incidents()
+
+st.metric(
+    "Total Incidents Analyzed",
+    total_incidents
+)
 
 uploaded_file = st.file_uploader(
     "Upload Network Output",
