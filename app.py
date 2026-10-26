@@ -9,6 +9,7 @@ from database import (
     save_incident,
     get_all_incidents,
     count_incidents,
+    get_recent_incidents,
 )
 
 MEMORY_FILE = "memory/incidents.txt"
@@ -63,6 +64,16 @@ st.metric(
     "Total Incidents Analyzed",
     total_incidents
 )
+
+recent_incidents = get_recent_incidents()
+
+st.subheader("Recent Incidents")
+
+for incident in recent_incidents:
+
+    st.write(
+        f"Incident {incident[0]} - {incident[1]}"
+    )
 
 uploaded_file = st.file_uploader(
     "Upload Network Output",

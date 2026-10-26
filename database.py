@@ -83,3 +83,25 @@ def count_incidents():
     conn.close()
 
     return total
+
+def get_recent_incidents(limit=5):
+
+    conn = sqlite3.connect(DB_NAME)
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT id, date_created
+        FROM incidents
+        ORDER BY id DESC
+        LIMIT ?
+        """,
+        (limit,)
+    )
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    return rows
