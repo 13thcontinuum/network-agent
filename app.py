@@ -144,6 +144,17 @@ Provide:
         
         st.write(analysis)
 
+        report_name = (
+            f"NetworkReport_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+        )
+
+        st.download_button(
+            label="Download Report",
+            data=analysis,
+            file_name=report_name,
+            mime="text/plain"
+        )
+
 if st.button("View Memory"):
 
     st.text(load_memory())
