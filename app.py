@@ -1,8 +1,8 @@
-import streamlit as st
-from ollama import chat
-
 from datetime import datetime
-import os
+
+import streamlit as st
+
+from analyzer import analyze_network_output
 
 from database import (
     init_db,
@@ -10,47 +10,8 @@ from database import (
     get_all_incidents,
     count_incidents,
     get_recent_incidents,
+    get_relevant_incidents,
 )
-
-MEMORY_FILE = "memory/incidents.txt"
-
-
-def save_memory(network_input, analysis):
-
-    with open(MEMORY_FILE, "a", encoding="utf-8") as file:
-
-        file.write("\n")
-        file.write("=" * 60)
-        file.write("\n")
-
-        file.write(
-            f"Date: {datetime.now()}\n"
-        )
-
-        file.write("\nINPUT:\n")
-        file.write(network_input)
-
-        file.write("\n\nANALYSIS:\n")
-        file.write(analysis)
-
-        file.write("\n")
-
-
-def load_memory():
-
-    try:
-
-        with open(
-            MEMORY_FILE,
-            "r",
-            encoding="utf-8"
-        ) as file:
-
-            return file.read()
-
-    except FileNotFoundError:
-
-        return "No previous incidents."
 
 init_db()
 
@@ -92,49 +53,10 @@ if uploaded_file is not None:
 
         with st.spinner("Analyzing network data..."):
 
-            memory = load_memory()
-            response = chat(
-                model="llama3.2",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": f"""
-You are a senior Cisco network engineer.
-
-You have access to previous
-network troubleshooting cases.
-
-Previous Memory:
-
-{memory}
-
-When appropriate,
-use previous incidents to assist
-your analysis.
-
-Provide:
-
-1. Summary
-2. Issues Found
-3. Root Cause
-4. Recommended Fixes
-"""
-                    },
-                    {
-                        "role": "user",
-                        "content": network_data
-                    }
-                ]
-            )
+            memory = get_relevant_incidents(network_data)
+            analysis = analyze_network_output(network_data, memory)
 
         st.subheader("AI Analysis")
-
-        analysis = response["message"]["content"]
-
-        save_memory(
-            network_data,
-            analysis
-            )
 
         save_incident(
             str(datetime.now()),
@@ -157,7 +79,10 @@ Provide:
 
 if st.button("View Memory"):
 
-    st.text(load_memory())
+    if uploaded_file is None:
+        st.info("Upload network output to find relevant incident memory.")
+    else:
+        st.text(get_relevant_incidents(network_data))
 
 if st.button("View Database"):
 

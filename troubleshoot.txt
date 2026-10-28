@@ -1,0 +1,88 @@
+==================================================
+NETWORK TROUBLESHOOTING REPORT
+==================================================
+
+Date: 26-Oct-2026
+
+Problem Description:
+
+Users in VLAN 20 report they cannot access the company web server located at 192.168.50.10.
+
+==================================================
+PING TESTS
+==================================================
+
+PC1> ping 192.168.20.1
+
+Reply from 192.168.20.1: bytes=32 time<1ms TTL=255
+
+PC1> ping 192.168.50.10
+
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+
+PC1> ping 10.10.10.2
+
+Reply from 10.10.10.2: bytes=32 time=4ms TTL=254
+
+==================================================
+SHOW IP INTERFACE BRIEF
+==================================================
+
+R1#show ip interface brief
+
+Interface              IP-Address      Status          Protocol
+
+GigabitEthernet0/0     192.168.20.1    up              up
+GigabitEthernet0/1     10.10.10.1      up              up
+GigabitEthernet0/2     unassigned      administratively down down
+Loopback0              1.1.1.1         up              up
+
+==================================================
+SHOW IP ROUTE
+==================================================
+
+R1#show ip route
+
+Gateway of last resort is not set
+
+C    192.168.20.0/24 is directly connected, GigabitEthernet0/0
+C    10.10.10.0/30 is directly connected, GigabitEthernet0/1
+
+==================================================
+R2 SHOW IP ROUTE
+==================================================
+
+R2#show ip route
+
+Gateway of last resort is not set
+
+C    192.168.50.0/24 is directly connected, GigabitEthernet0/0
+C    10.10.10.0/30 is directly connected, GigabitEthernet0/1
+
+==================================================
+SHOW RUNNING-CONFIG
+==================================================
+
+interface GigabitEthernet0/0
+ ip address 192.168.20.1 255.255.255.0
+ no shutdown
+
+interface GigabitEthernet0/1
+ ip address 10.10.10.1 255.255.255.252
+ no shutdown
+
+router ospf 1
+ network 192.168.20.0 0.0.0.255 area 0
+
+==================================================
+SHOW CDP NEIGHBORS
+==================================================
+
+Device ID        Local Intf      Holdtime
+R2               Gig 0/1         147
+
+==================================================
+SHOW OSPF NEIGHBOR

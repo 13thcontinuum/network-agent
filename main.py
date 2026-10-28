@@ -1,32 +1,16 @@
-from ollama import chat
+from datetime import datetime
 
-# Read router output
-with open("router_output.txt", "r") as file:
+from analyzer import analyze_network_output
+from database import get_relevant_incidents, init_db, save_incident
+
+init_db()
+
+with open("router_output.txt", "r", encoding="utf-8") as file:
     network_data = file.read()
 
-response = chat(
-    model="llama3.2",
-    messages=[
-        {
-            "role": "system",
-            "content": """
-You are a senior Cisco network engineer.
-
-Analyse network troubleshooting output.
-
-Provide:
-1. Summary
-2. Issues Found
-3. Root Cause
-4. Recommended Fixes
-"""
-        },
-        {
-            "role": "user",
-            "content": network_data
-        }
-    ]
-)
+previous_incidents = get_relevant_incidents(network_data)
+analysis = analyze_network_output(network_data, previous_incidents)
+save_incident(str(datetime.now()), network_data, analysis)
 
 print("\n=== AI NETWORK ANALYSIS ===\n")
-print(response["message"]["content"])
+print(analysis)

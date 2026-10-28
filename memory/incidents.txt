@@ -162,3 +162,211 @@ This issue is similar to [Incident 1234](https://example.com/incident-1234), whe
 **Similar Symptoms**
 
 This issue is similar to [Incident 5678](https://example.com/incident-5678), where a device was unable to ping a specific IP address due to a missing route configuration. The solution involved configuring a route to the target network and verifying the ARP cache.
+
+============================================================
+Date: 2026-10-27 20:41:55.874534
+
+INPUT:
+==================================================
+NETWORK TROUBLESHOOTING REPORT
+==================================================
+
+Date: 26-Oct-2026
+
+Problem Description:
+
+Users in VLAN 20 report they cannot access the company web server located at 192.168.50.10.
+
+==================================================
+PING TESTS
+==================================================
+
+PC1> ping 192.168.20.1
+
+Reply from 192.168.20.1: bytes=32 time<1ms TTL=255
+
+PC1> ping 192.168.50.10
+
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+
+PC1> ping 10.10.10.2
+
+Reply from 10.10.10.2: bytes=32 time=4ms TTL=254
+
+==================================================
+SHOW IP INTERFACE BRIEF
+==================================================
+
+R1#show ip interface brief
+
+Interface              IP-Address      Status          Protocol
+
+GigabitEthernet0/0     192.168.20.1    up              up
+GigabitEthernet0/1     10.10.10.1      up              up
+GigabitEthernet0/2     unassigned      administratively down down
+Loopback0              1.1.1.1         up              up
+
+==================================================
+SHOW IP ROUTE
+==================================================
+
+R1#show ip route
+
+Gateway of last resort is not set
+
+C    192.168.20.0/24 is directly connected, GigabitEthernet0/0
+C    10.10.10.0/30 is directly connected, GigabitEthernet0/1
+
+==================================================
+R2 SHOW IP ROUTE
+==================================================
+
+R2#show ip route
+
+Gateway of last resort is not set
+
+C    192.168.50.0/24 is directly connected, GigabitEthernet0/0
+C    10.10.10.0/30 is directly connected, GigabitEthernet0/1
+
+==================================================
+SHOW RUNNING-CONFIG
+==================================================
+
+interface GigabitEthernet0/0
+ ip address 192.168.20.1 255.255.255.0
+ no shutdown
+
+interface GigabitEthernet0/1
+ ip address 10.10.10.1 255.255.255.252
+ no shutdown
+
+router ospf 1
+ network 192.168.20.0 0.0.0.255 area 0
+
+==================================================
+SHOW CDP NEIGHBORS
+==================================================
+
+Device ID        Local Intf      Holdtime
+R2               Gig 0/1         147
+
+==================================================
+SHOW OSPF NEIGHBOR
+
+ANALYSIS:
+**Network Troubleshooting Report**
+
+**Date:** 26-Oct-2026
+
+**Problem Description:**
+
+Users in VLAN 20 report they cannot access the company web server located at 192.168.50.10.
+
+**PING TESTS:**
+
+PC1> ping 192.168.20.1
+
+Reply from 192.168.20.1: bytes=32 time<1ms TTL=255
+
+PC1> ping 192.168.50.10
+
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+
+PC1> ping 10.10.10.2
+
+Reply from 10.10.10.2: bytes=32 time=4ms TTL=254
+
+**SHOW IP INTERFACE BRIEF:**
+
+R1#show ip interface brief
+
+Interface              IP-Address      Status          Protocol
+
+GigabitEthernet0/0     192.168.20.1    up              up
+GigabitEthernet0/1     10.10.10.1      up              up
+GigabitEthernet0/2     unassigned      administratively down down
+Loopback0              1.1.1.1         up              up
+
+**SHOW IP ROUTE:**
+
+R1#show ip route
+
+Gateway of last resort is not set
+
+C    192.168.20.0/24 is directly connected, GigabitEthernet0/0
+C    10.10.10.0/30 is directly connected, GigabitEthernet0/1
+
+**R2 SHOW IP ROUTE:**
+
+R2#show ip route
+
+Gateway of last resort is not set
+
+C    192.168.50.0/24 is directly connected, GigabitEthernet0/0
+C    10.10.10.0/30 is directly connected, GigabitEthernet0/1
+
+**SHOW RUNNING-CONFIG:**
+
+interface GigabitEthernet0/0
+ ip address 192.168.20.1 255.255.255.0
+ no shutdown
+
+interface GigabitEthernet0/1
+ ip address 10.10.10.1 255.255.255.252
+ no shutdown
+
+router ospf 1
+ network 192.168.20.0 0.0.0.255 area 0
+
+**SHOW CDP NEIGHBORS:**
+
+Device ID        Local Intf      Holdtime
+
+R2               Gig 0/1         147
+
+**SHOW OSPF NEIGHBOR:**
+
+No OSPF neighbor information is available.
+
+**Analysis:**
+
+Based on the provided information, it appears that there is no default gateway set on the device, which is causing the issue with accessing the company web server located at 192.168.50.10. The device is trying to resolve the default gateway for the 192.168.50.10 IP address, which is causing the request to timeout.
+
+**Issues Found:**
+
+1. No default gateway is set on the device.
+2. The device is trying to resolve the default gateway for the 192.168.50.10 IP address, which is causing the request to timeout.
+3. There is no OSPF neighbor information available on the device.
+
+**Root Cause:**
+
+The root cause of this issue is likely due to the lack of a default gateway being set on the device. The device is not able to resolve the default gateway for the 192.168.50.10 IP address, resulting in a timeout.
+
+**Recommended Fixes:**
+
+1. **Configure a default gateway**: Set a default gateway on the device by specifying the IP address of a nearby router or switch that has a valid routing configuration.
+2. **Configure OSPF**: Configure OSPF on the device to establish a connection to the 192.168.50.0/24 network.
+3. **Verify routing configuration**: Check the routing configuration on the device to ensure that it is correctly configured and that the necessary routes are enabled.
+
+**Example Configuration:**
+
+To set a default gateway, you can use the following command:
+```
+ip route 0.0.0.0/0 gateway 192.168.50.10
+```
+To configure OSPF, you can use the following command:
+```
+router ospf 1
+ network 192.168.50.0 0.0.0.255 area 0
+```
+**Additional Troubleshooting Steps:**
+
+1. **Check the ARP cache**: Verify that the ARP cache is populated with the necessary IP addresses for the device to communicate with other networks.
+2. **Check for connectivity issues**: Verify that there are no connectivity issues with the device, such as physical or configuration issues.
+3. **Use debug commands**: Use debug commands, such as `debug ip route`, to verify that the routing configuration is being applied correctly and that the device is attempting to resolve the default gateway for the 192.168.50.10 IP address.
